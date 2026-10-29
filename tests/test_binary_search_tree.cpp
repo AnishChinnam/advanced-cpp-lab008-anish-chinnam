@@ -172,3 +172,37 @@ TEST_CASE("BST contains is consistent with search") {
         REQUIRE_FALSE(tree.search(value));
     }
 }
+
+TEST_CASE("BST deletion boundaries and successor with a right child") {
+    BinarySearchTree tree;
+    REQUIRE_FALSE(tree.remove(1));
+    for (int value : {50, 20, 80, 60, 70}) tree.insert(value);
+    REQUIRE(tree.remove(50));
+    REQUIRE(tree.inorderTraversal() == std::vector<int>({20, 60, 70, 80}));
+    for (int value : {60, 20, 80, 70}) REQUIRE(tree.remove(value));
+    REQUIRE(tree.empty());
+    REQUIRE(tree.height() == 0);
+    REQUIRE_FALSE(tree.remove(70));
+    REQUIRE_THROWS_AS(tree.minimum(), std::logic_error);
+}
+
+#include <limits>
+#include <random>
+#include <set>
+TEST_CASE("BST mixed operations agree with an ordered set") {
+    BinarySearchTree tree;
+    std::set<int> expected;
+    for (int value : {std::numeric_limits<int>::min(), std::numeric_limits<int>::max()}) {
+        REQUIRE(tree.insert(value));
+        expected.insert(value);
+    }
+    std::mt19937 random(8);
+    for (int i = 0; i < 500; ++i) {
+        int value = static_cast<int>(random() % 101) - 50;
+        if (random() % 2) REQUIRE(tree.insert(value) == expected.insert(value).second);
+        else REQUIRE(tree.remove(value) == (expected.erase(value) != 0));
+        REQUIRE(tree.contains(value) == (expected.count(value) != 0));
+        REQUIRE(tree.size() == expected.size());
+        REQUIRE(tree.inorderTraversal() == std::vector<int>(expected.begin(), expected.end()));
+    }
+}

@@ -18,6 +18,10 @@ public:
     BinarySearchTree();
     ~BinarySearchTree();
 
+    // This class exclusively owns its nodes; prevent shallow pointer copies.
+    BinarySearchTree(const BinarySearchTree&) = delete;
+    BinarySearchTree& operator=(const BinarySearchTree&) = delete;
+
     bool insert(int value);
     bool remove(int value);
     bool search(int value) const;
